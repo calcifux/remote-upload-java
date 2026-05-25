@@ -3,11 +3,15 @@
 # rebuild.sh - borra todo, limpia todo y corre todo de nuevo, desde cero.
 # Vuelca TODO (consola + maven completo, con stack traces) a rebuild.log en la raiz.
 #
+# Por defecto corre 'install' = MISMO lifecycle que el CI (tests + jacoco report +
+# jacoco-check), asi lo que pasa local pasa en GitHub Actions y no te sorprende.
+# Para iterar rapido sin el gate de cobertura, usa -t (solo 'test').
+#
 # Uso:
-#   ./rebuild.sh                    # limpia + corre TODOS los modulos (clean test)
-#   ./rebuild.sh remote-upload-s3   # limpia + corre SOLO ese modulo y sus deps (-pl X -am)
-#   ./rebuild.sh -i                 # ademas instala los jars en ~/.m2 (install, no solo test)
-#   ./rebuild.sh -i remote-upload-s3
+#   ./rebuild.sh                    # clean install de TODOS los modulos (= CI)
+#   ./rebuild.sh -t                 # rapido: solo 'test' (sin verify/jacoco-check)
+#   ./rebuild.sh remote-upload-s3   # solo ese modulo y sus deps (-pl X -am)
+#   ./rebuild.sh -t remote-upload-s3
 #
 # Que hace:
 #   1. Borra los artefactos cacheados del groupId en ~/.m2 (incluye el "not found" cacheado).
@@ -25,12 +29,13 @@ M2_REPO="${HOME}/.m2/repository/com/github/calcifux"
 LOG="${ROOT}/rebuild.log"
 
 # --- flags / args ---
-GOAL="test"
+GOAL="install"
 MODULE=""
 for arg in "$@"; do
   case "$arg" in
-    -i|--install) GOAL="install" ;;
-    -h|--help)    sed -n '3,17p' "$0"; exit 0 ;;
+    -t|--test)    GOAL="test" ;;
+    -i|--install) GOAL="install" ;;   # default; alias por costumbre
+    -h|--help)    sed -n '3,20p' "$0"; exit 0 ;;
     -*)           echo "Flag no reconocido: $arg (usa -h)" >&2; exit 2 ;;
     *)            MODULE="$arg" ;;
   esac
