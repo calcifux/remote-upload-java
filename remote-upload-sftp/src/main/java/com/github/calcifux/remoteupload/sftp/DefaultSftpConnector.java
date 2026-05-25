@@ -61,11 +61,7 @@ final class DefaultSftpConnector implements SftpConnector {
                 session.setKeyIdentityProvider(new FileKeyPairProvider(Paths.get(privateKeyPath)));
             }
 
-            try {
-                session.auth().verify(authTimeout.toMillis());
-            } catch (IOException authEx) {
-                throw new TerminalUploadException("SFTP authentication failed for " + user + "@" + host, authEx);
-            }
+            authenticate(session);
 
             sftp = SftpClientFactory.instance().createSftpClient(session);
             // Effectively-final handles: ownership of these three resources
@@ -91,6 +87,14 @@ final class DefaultSftpConnector implements SftpConnector {
             closeQuietly(session);
             stopQuietly(sshClient);
             throw e;
+        }
+    }
+
+    private void authenticate(ClientSession session) {
+        try {
+            session.auth().verify(authTimeout.toMillis());
+        } catch (IOException authEx) {
+            throw new TerminalUploadException("SFTP authentication failed for " + user + "@" + host, authEx);
         }
     }
 

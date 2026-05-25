@@ -69,7 +69,7 @@ class SftpTargetTest {
         when(sftp.write("/dir/f")).thenThrow(new IOException("disk full"));
         SftpSession session = new SftpSession() {
             @Override public SftpClient client() { return sftp; }
-            @Override public void close() { }
+            @Override public void close() { /* no-op */ }
         };
 
         assertThatThrownBy(() -> RemoteUpload.to(targetWith(() -> session)).body(new byte[]{1}).upload())

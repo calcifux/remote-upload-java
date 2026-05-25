@@ -58,7 +58,12 @@ public class FtpTarget implements UploadTarget {
     public UploadResult upload(UploadContent content) throws IOException {
         log.debug("[FtpTarget] STOR {}://{}@{}:{}{}", secure ? "ftps" : "ftp", user, host, port, path);
 
-        FTPClient ftp = (sharedClient != null) ? sharedClient : (secure ? new FTPSClient() : new FTPClient());
+        FTPClient ftp;
+        if (sharedClient != null) {
+            ftp = sharedClient;
+        } else {
+            ftp = secure ? new FTPSClient() : new FTPClient();
+        }
         ftp.setConnectTimeout((int) connectTimeout.toMillis());
         try {
             ftp.connect(host, port);
