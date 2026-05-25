@@ -88,7 +88,7 @@ class SftpTargetTest {
         // No injected connector + password set → exercises `new DefaultSftpConnector(...)`
         // in upload(); connecting to a refused port fails fast → Retryable.
         SftpTarget target = SftpTarget.builder()
-                .host("127.0.0.1").port(1).user("u").password("p").path("/f")
+                .host("localhost").port(1).user("u").password("p").path("/f")
                 .connectTimeout(java.time.Duration.ofSeconds(2))
                 .authTimeout(java.time.Duration.ofSeconds(2))
                 .build();

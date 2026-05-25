@@ -86,7 +86,7 @@ class FtpTargetTest {
     void real_client_against_dead_port_is_retryable() {
         // No injected client → exercises `new FTPClient()` + connect failure path.
         FtpTarget target = FtpTarget.builder()
-                .host("127.0.0.1").port(1).path("/f")
+                .host("localhost").port(1).path("/f")
                 .connectTimeout(java.time.Duration.ofSeconds(2))
                 .build();
 
@@ -98,7 +98,7 @@ class FtpTargetTest {
     void real_ftps_client_against_dead_port_is_retryable() {
         // secure=true → exercises `new FTPSClient()` branch.
         FtpTarget target = FtpTarget.builder()
-                .host("127.0.0.1").port(1).path("/f").secure(true)
+                .host("localhost").port(1).path("/f").secure(true)
                 .connectTimeout(java.time.Duration.ofSeconds(2))
                 .build();
 

@@ -12,11 +12,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 class RemoteUploadCdiServiceTest {
 
-    /** The @ConfigProperty field is package-private, so the test sets it directly (no CDI container). */
+    /** Constructor injection → the test just passes the config value directly (no CDI container). */
     private RemoteUploadCdiService serviceWith(String checksumAlgorithm) {
-        RemoteUploadCdiService service = new RemoteUploadCdiService();
-        service.checksumAlgorithm = checksumAlgorithm;
-        return service;
+        return new RemoteUploadCdiService(checksumAlgorithm);
     }
 
     @Test

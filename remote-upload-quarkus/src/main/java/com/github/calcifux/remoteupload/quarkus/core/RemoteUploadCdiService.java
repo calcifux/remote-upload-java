@@ -29,9 +29,18 @@ import java.io.InputStream;
 @ApplicationScoped
 public class RemoteUploadCdiService {
 
+    private final String checksumAlgorithm;
+
+    /**
+     * @param checksumAlgorithm digest algorithm (e.g. {@code SHA-256}); blank/empty
+     *                          disables per-upload checksums. Injected by CDI from the
+     *                          {@code remote-upload.checksum-algorithm} config property.
+     */
     @Inject
-    @ConfigProperty(name = "remote-upload.checksum-algorithm", defaultValue = "")
-    String checksumAlgorithm;
+    public RemoteUploadCdiService(
+            @ConfigProperty(name = "remote-upload.checksum-algorithm", defaultValue = "") String checksumAlgorithm) {
+        this.checksumAlgorithm = checksumAlgorithm;
+    }
 
     /**
      * Uploads from a stream of known length.
