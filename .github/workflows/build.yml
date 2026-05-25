@@ -32,10 +32,8 @@ jobs:
         run: mvn -B validate --no-transfer-progress
 
       # `install` runs the full lifecycle through `verify`: unit tests + JaCoCo
-      # report + the coverage gate (jacoco-check). SonarCloud is intentionally
-      # NOT wired yet — add a `sonar` step here once the SONAR_TOKEN secret and
-      # the SonarCloud project exist.
-      - name: Build all modules (tests + coverage gate)
+      # report + the coverage check (jacoco-check, currently non-blocking).
+      - name: Build all modules (tests + coverage)
         run: mvn -B clean install --no-transfer-progress
 
       - name: Upload test reports on failure

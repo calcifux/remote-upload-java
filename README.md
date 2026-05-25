@@ -1,5 +1,6 @@
 # remote-upload
 
+[![JitPack](https://jitpack.io/v/calcifux/remote-upload-java.svg)](https://jitpack.io/#calcifux/remote-upload-java)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Java 21](https://img.shields.io/badge/Java-21-orange.svg)](https://openjdk.org/projects/jdk/21/)
 
@@ -132,7 +133,7 @@ This is the deliberate improvement over `remote-download`'s single exception typ
 <dependency>
   <groupId>com.github.calcifux.remote-upload-java</groupId>
   <artifactId>remote-upload-s3</artifactId>
-  <version>1.0.0</version>
+  <version>v1.0.0</version>
 </dependency>
 ```
 

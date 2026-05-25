@@ -20,5 +20,5 @@ target/
 .DS_Store
 Thumbs.db
 
-# Logs — build/sonar logs NEVER go to the repo (lesson from remote-download).
+# Logs — kept out of the repo.
 *.log
