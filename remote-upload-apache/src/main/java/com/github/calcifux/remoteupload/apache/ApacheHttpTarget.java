@@ -107,8 +107,7 @@ public class ApacheHttpTarget implements UploadTarget {
             clientBuilder.setDefaultCredentialsProvider(credentialsProvider);
         }
 
-        CloseableHttpClient client = clientBuilder.build();
-        try {
+        try (CloseableHttpClient client = clientBuilder.build()) {
             BasicClassicHttpRequest request = new BasicClassicHttpRequest(method, uri);
             headers.forEach(request::addHeader);
 
@@ -133,12 +132,6 @@ public class ApacheHttpTarget implements UploadTarget {
             }
         } catch (IOException e) {
             throw new RetryableUploadException("I/O error uploading to " + uri, e);
-        } finally {
-            try {
-                client.close();
-            } catch (IOException e) {
-                log.debug("[ApacheHttpTarget] ignored failure closing client", e);
-            }
         }
     }
 

@@ -1,6 +1,7 @@
 package com.github.calcifux.remoteupload.azure;
 
 import com.azure.core.http.rest.Response;
+import com.azure.core.util.BinaryData;
 import com.azure.core.util.Context;
 import com.azure.storage.blob.BlobClient;
 import com.azure.storage.blob.BlobClientBuilder;
@@ -64,7 +65,8 @@ public class AzureBlobTarget implements UploadTarget {
         BlobClient client = (sharedClient != null) ? sharedClient : buildClient();
 
         BlobParallelUploadOptions options = content.contentLength().isPresent()
-                ? new BlobParallelUploadOptions(content.getBody(), content.getContentLength())
+                ? new BlobParallelUploadOptions(
+                        BinaryData.fromStream(content.getBody(), content.getContentLength()))
                 : new BlobParallelUploadOptions(content.getBody());
         content.contentType().ifPresent(ct ->
                 options.setHeaders(new BlobHttpHeaders().setContentType(ct)));
