@@ -49,6 +49,7 @@ final class DefaultSftpConnector implements SftpConnector {
         SshClient sshClient = SshClient.setUpDefaultClient();
         sshClient.start();
         ClientSession session = null;
+        SftpClient sftp = null;
         try {
             session = sshClient.connect(user, host, port)
                     .verify(connectTimeout.toMillis())
@@ -66,22 +67,27 @@ final class DefaultSftpConnector implements SftpConnector {
                 throw new TerminalUploadException("SFTP authentication failed for " + user + "@" + host, authEx);
             }
 
-            SftpClient sftp = SftpClientFactory.instance().createSftpClient(session);
+            sftp = SftpClientFactory.instance().createSftpClient(session);
+            // Effectively-final handles: ownership of these three resources
+            // transfers to the returned SftpSession and is released in close().
             ClientSession openSession = session;
+            SftpClient openSftp = sftp;
             return new SftpSession() {
                 @Override
                 public SftpClient client() {
-                    return sftp;
+                    return openSftp;
                 }
 
                 @Override
                 public void close() {
-                    closeQuietly(sftp);
+                    closeQuietly(openSftp);
                     closeQuietly(openSession);
                     stopQuietly(sshClient);
                 }
             };
         } catch (RuntimeException | IOException e) {
+            // Failure before hand-off: close everything opened so far (incl. sftp).
+            closeQuietly(sftp);
             closeQuietly(session);
             stopQuietly(sshClient);
             throw e;
