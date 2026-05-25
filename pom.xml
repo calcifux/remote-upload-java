@@ -81,6 +81,29 @@
     <maven-surefire-plugin.version>3.1.2</maven-surefire-plugin.version>
     <flatten-maven-plugin.version>1.5.0</flatten-maven-plugin.version>
 
+    <!-- SonarCloud (SonarQube Cloud) — analysis runs in CI via the sonar-maven
+         plugin, which reads these sonar.* properties; the workflow passes the
+         SONAR_TOKEN secret. xmlReportPaths aggregates every module's JaCoCo XML
+         so the coverage metric reflects the whole reactor. Quality gate is the
+         default "Sonar way" (evaluates new code), configured on the Sonar side. -->
+    <sonar.organization>calcifux</sonar.organization>
+    <sonar.projectKey>calcifux_remote-upload-java</sonar.projectKey>
+    <sonar.host.url>https://sonarcloud.io</sonar.host.url>
+    <sonar.coverage.jacoco.xmlReportPaths>
+      ${project.basedir}/../remote-upload-core/target/site/jacoco/jacoco.xml,
+      ${project.basedir}/../remote-upload-apache/target/site/jacoco/jacoco.xml,
+      ${project.basedir}/../remote-upload-s3/target/site/jacoco/jacoco.xml,
+      ${project.basedir}/../remote-upload-azure/target/site/jacoco/jacoco.xml,
+      ${project.basedir}/../remote-upload-gcs/target/site/jacoco/jacoco.xml,
+      ${project.basedir}/../remote-upload-sftp/target/site/jacoco/jacoco.xml,
+      ${project.basedir}/../remote-upload-ftp/target/site/jacoco/jacoco.xml,
+      ${project.basedir}/../remote-upload-spring/target/site/jacoco/jacoco.xml,
+      ${project.basedir}/../remote-upload-quarkus/target/site/jacoco/jacoco.xml
+    </sonar.coverage.jacoco.xmlReportPaths>
+    <sonar.coverage.exclusions>
+      examples/**
+    </sonar.coverage.exclusions>
+
     <!-- Quarkus / Jakarta -->
     <jakarta.cdi.version>4.0.1</jakarta.cdi.version>
     <jakarta.ws.rs.version>3.1.0</jakarta.ws.rs.version>

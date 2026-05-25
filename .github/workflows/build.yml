@@ -20,6 +20,9 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          # Full history so SonarCloud can blame each line to the right commit.
+          fetch-depth: 0
 
       - name: Set up JDK ${{ matrix.java }}
         uses: actions/setup-java@v4
@@ -28,6 +31,13 @@ jobs:
           java-version: ${{ matrix.java }}
           cache: maven
 
+      - name: Cache SonarCloud packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.sonar/cache
+          key: ${{ runner.os }}-sonar
+          restore-keys: ${{ runner.os }}-sonar
+
       - name: Validate Maven config
         run: mvn -B validate --no-transfer-progress
 
@@ -35,6 +45,17 @@ jobs:
       # report + the coverage check (jacoco-check, currently non-blocking).
       - name: Build all modules (tests + coverage)
         run: mvn -B clean install --no-transfer-progress
+
+      - name: SonarCloud analysis
+        # Only on main pushes and same-repo PRs — secrets aren't available to
+        # PRs from forks, so the step would fail noisily there.
+        if: github.event_name == 'push' || github.event.pull_request.head.repo.full_name == github.repository
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          mvn -B org.sonarsource.scanner.maven:sonar-maven-plugin:sonar \
+              --no-transfer-progress
 
       - name: Upload test reports on failure
         if: failure()
