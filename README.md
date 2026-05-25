@@ -1,5 +1,6 @@
 # remote-upload
 
+[![build](https://github.com/calcifux/remote-upload-java/actions/workflows/build.yml/badge.svg?branch=main)](https://github.com/calcifux/remote-upload-java/actions/workflows/build.yml)
 [![JitPack](https://jitpack.io/v/calcifux/remote-upload-java.svg)](https://jitpack.io/#calcifux/remote-upload-java)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Java 21](https://img.shields.io/badge/Java-21-orange.svg)](https://openjdk.org/projects/jdk/21/)

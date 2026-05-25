@@ -73,9 +73,12 @@
     <!-- Coverage -->
     <jacoco.version>0.8.12</jacoco.version>
 
-    <!-- Build plugins (versions now pinned explicitly — no starter-parent to manage them) -->
-    <maven-compiler-plugin.version>3.13.0</maven-compiler-plugin.version>
-    <maven-surefire-plugin.version>3.2.5</maven-surefire-plugin.version>
+    <!-- Build plugins pinned explicitly (BOM import doesn't manage them). Versions
+         capped to what JitPack's old build Maven (~3.5) accepts: compiler 3.11.0 and
+         surefire 3.1.2 require Maven 3.2.5; 3.13.0 / 3.2.5 require Maven 3.6.3 and
+         break JitPack. These match Spring Boot 3.2.5's parent; CI/local stay modern. -->
+    <maven-compiler-plugin.version>3.11.0</maven-compiler-plugin.version>
+    <maven-surefire-plugin.version>3.1.2</maven-surefire-plugin.version>
     <flatten-maven-plugin.version>1.5.0</flatten-maven-plugin.version>
 
     <!-- Quarkus / Jakarta -->
