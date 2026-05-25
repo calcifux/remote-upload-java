@@ -1,0 +1,64 @@
+name: Bug report
+description: Report a defect in remote-upload
+labels: [ "bug" ]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to file a bug. A minimal reproduction gets it fixed fastest.
+
+  - type: dropdown
+    id: module
+    attributes:
+      label: Affected module
+      options:
+        - remote-upload-core
+        - remote-upload-apache
+        - remote-upload-s3
+        - remote-upload-azure
+        - remote-upload-gcs
+        - remote-upload-sftp
+        - remote-upload-ftp
+        - remote-upload-spring
+        - remote-upload-quarkus
+        - not sure
+    validations:
+      required: true
+
+  - type: input
+    id: version
+    attributes:
+      label: Version
+      description: Release tag (e.g. v1.0.0) or commit hash.
+      placeholder: v1.0.0
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Minimal reproduction
+      description: The target builder + the call that fails. Redact any secrets.
+      render: java
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected vs. actual behavior
+    validations:
+      required: true
+
+  - type: textarea
+    id: stacktrace
+    attributes:
+      label: Stack trace (if any)
+      render: text
+
+  - type: input
+    id: env
+    attributes:
+      label: Environment
+      description: JDK version, OS, framework (Spring/Quarkus/plain), provider (S3/MinIO/Azure/...).
+      placeholder: "JDK 21, macOS, Spring Boot 3.5, MinIO"

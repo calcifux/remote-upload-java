@@ -1,0 +1,352 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="
+            http://maven.apache.org/POM/4.0.0
+            https://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+  <modelVersion>4.0.0</modelVersion>
+
+  <groupId>com.github.calcifux</groupId>
+  <artifactId>remote-upload-parent</artifactId>
+  <version>${revision}</version>
+  <packaging>pom</packaging>
+
+  <name>remote-upload-parent</name>
+  <description>
+    Java swiss-army knife for streaming local content INTO remote storage
+    (HTTP, S3, Azure Blob, GCS, SFTP, FTP) across any framework
+    (Spring, Quarkus, plain Servlet, plain Java). Write-side twin of remote-download.
+  </description>
+  <url>https://github.com/calcifux/remote-upload-java</url>
+
+  <licenses>
+    <license>
+      <name>MIT License</name>
+      <url>https://opensource.org/licenses/MIT</url>
+    </license>
+  </licenses>
+
+  <!--
+    NO <parent>. For a LIBRARY the textbook approach is to import the
+    spring-boot-dependencies BOM (below) instead of inheriting
+    spring-boot-starter-parent: we get Boot's managed versions without dragging
+    in app-oriented plugin/build config, and we stay free to add our own parent
+    later. (See README; decided 2026-05-25.)
+  -->
+
+  <properties>
+    <!-- Single source of truth for the release version (resolved by flatten at publish). -->
+    <revision>1.0.0</revision>
+
+    <java.version>21</java.version>
+    <maven.compiler.release>21</maven.compiler.release>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+
+    <!-- Spring Boot BOM — manages spring-*, junit, assertj, mockito, slf4j,
+         jakarta.servlet-api, etc. Imported in dependencyManagement below. -->
+    <spring.boot.version>3.2.5</spring.boot.version>
+
+    <lombok.version>1.18.36</lombok.version>
+
+    <!-- HTTP enterprise -->
+    <httpclient5.version>5.3.1</httpclient5.version>
+
+    <!-- Cloud SDKs -->
+    <aws.sdk.version>2.25.40</aws.sdk.version>
+    <azure.storage.blob.version>12.25.4</azure.storage.blob.version>
+    <gcs.version>2.40.1</gcs.version>
+
+    <!-- File-transfer protocols -->
+    <sshd.version>2.12.1</sshd.version>
+    <commons-net.version>3.10.0</commons-net.version>
+
+    <!-- Testing -->
+    <wiremock.version>3.3.1</wiremock.version>
+    <!-- Spring Boot 3.2.5 trae byte-buddy 1.14.x, que solo conoce hasta Java 22,
+         por eso mock(Interface.class) truena en JDK 23. Lo subimos a 1.17.x, que
+         soporta Java 23 de forma NATIVA → Mockito mockea sin el flag experimental
+         (el flag, según la doc de byte-buddy, puede emitir bytecode incorrecto). -->
+    <byte-buddy.version>1.17.7</byte-buddy.version>
+
+    <!-- Coverage -->
+    <jacoco.version>0.8.12</jacoco.version>
+
+    <!-- Build plugins (versions now pinned explicitly — no starter-parent to manage them) -->
+    <maven-compiler-plugin.version>3.13.0</maven-compiler-plugin.version>
+    <maven-surefire-plugin.version>3.2.5</maven-surefire-plugin.version>
+    <flatten-maven-plugin.version>1.5.0</flatten-maven-plugin.version>
+
+    <!-- SonarCloud (wired via GitHub Actions; projectKey + SONAR_TOKEN there). -->
+    <sonar.organization>calcifux</sonar.organization>
+    <sonar.projectKey>calcifux_remote-upload-java</sonar.projectKey>
+    <sonar.host.url>https://sonarcloud.io</sonar.host.url>
+    <sonar.coverage.jacoco.xmlReportPaths>
+      ${project.basedir}/../remote-upload-core/target/site/jacoco/jacoco.xml,
+      ${project.basedir}/../remote-upload-apache/target/site/jacoco/jacoco.xml,
+      ${project.basedir}/../remote-upload-s3/target/site/jacoco/jacoco.xml,
+      ${project.basedir}/../remote-upload-azure/target/site/jacoco/jacoco.xml,
+      ${project.basedir}/../remote-upload-gcs/target/site/jacoco/jacoco.xml,
+      ${project.basedir}/../remote-upload-sftp/target/site/jacoco/jacoco.xml,
+      ${project.basedir}/../remote-upload-ftp/target/site/jacoco/jacoco.xml,
+      ${project.basedir}/../remote-upload-spring/target/site/jacoco/jacoco.xml,
+      ${project.basedir}/../remote-upload-quarkus/target/site/jacoco/jacoco.xml
+    </sonar.coverage.jacoco.xmlReportPaths>
+    <sonar.coverage.exclusions>
+      examples/**
+    </sonar.coverage.exclusions>
+
+    <!-- Quarkus / Jakarta -->
+    <jakarta.cdi.version>4.0.1</jakarta.cdi.version>
+    <jakarta.ws.rs.version>3.1.0</jakarta.ws.rs.version>
+    <microprofile.config.version>3.1</microprofile.config.version>
+  </properties>
+
+  <modules>
+    <module>remote-upload-core</module>
+    <module>remote-upload-apache</module>
+    <module>remote-upload-s3</module>
+    <module>remote-upload-azure</module>
+    <module>remote-upload-gcs</module>
+    <module>remote-upload-sftp</module>
+    <module>remote-upload-ftp</module>
+    <module>remote-upload-spring</module>
+    <module>remote-upload-quarkus</module>
+  </modules>
+
+  <dependencyManagement>
+    <dependencies>
+      <!-- byte-buddy override: un BOM importado (scope=import) NO respeta el
+           <byte-buddy.version> de nuestras <properties> (eso solo aplica heredando
+           spring-boot-starter-parent). Para que Mockito mockee interfaces en JDK 23
+           con soporte NATIVO, fijamos byte-buddy + agent explicitamente ANTES del
+           import del BOM (la gestion directa gana sobre la importada). -->
+      <dependency>
+        <groupId>net.bytebuddy</groupId>
+        <artifactId>byte-buddy</artifactId>
+        <version>${byte-buddy.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>net.bytebuddy</groupId>
+        <artifactId>byte-buddy-agent</artifactId>
+        <version>${byte-buddy.version}</version>
+      </dependency>
+
+      <!-- Spring Boot BOM — versions for spring-*, junit-jupiter, assertj-core,
+           mockito-core, slf4j-api, jakarta.servlet-api, etc. -->
+      <dependency>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-dependencies</artifactId>
+        <version>${spring.boot.version}</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+
+      <!-- Internal modules -->
+      <dependency>
+        <groupId>com.github.calcifux</groupId>
+        <artifactId>remote-upload-core</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+
+      <!-- Apache HttpClient 5 -->
+      <dependency>
+        <groupId>org.apache.httpcomponents.client5</groupId>
+        <artifactId>httpclient5</artifactId>
+        <version>${httpclient5.version}</version>
+      </dependency>
+
+      <!-- AWS SDK BOM -->
+      <dependency>
+        <groupId>software.amazon.awssdk</groupId>
+        <artifactId>bom</artifactId>
+        <version>${aws.sdk.version}</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+
+      <!-- Azure Storage Blob -->
+      <dependency>
+        <groupId>com.azure</groupId>
+        <artifactId>azure-storage-blob</artifactId>
+        <version>${azure.storage.blob.version}</version>
+      </dependency>
+
+      <!-- Google Cloud Storage -->
+      <dependency>
+        <groupId>com.google.cloud</groupId>
+        <artifactId>google-cloud-storage</artifactId>
+        <version>${gcs.version}</version>
+      </dependency>
+
+      <!-- Apache Mina SSHD (SFTP) -->
+      <dependency>
+        <groupId>org.apache.sshd</groupId>
+        <artifactId>sshd-sftp</artifactId>
+        <version>${sshd.version}</version>
+      </dependency>
+
+      <!-- Apache Commons Net (FTP / FTPS) -->
+      <dependency>
+        <groupId>commons-net</groupId>
+        <artifactId>commons-net</artifactId>
+        <version>${commons-net.version}</version>
+      </dependency>
+
+      <!-- WireMock (HTTP stubs for tests) -->
+      <dependency>
+        <groupId>org.wiremock</groupId>
+        <artifactId>wiremock-standalone</artifactId>
+        <version>${wiremock.version}</version>
+        <scope>test</scope>
+      </dependency>
+
+      <!-- Jakarta + MicroProfile (Quarkus) -->
+      <dependency>
+        <groupId>jakarta.enterprise</groupId>
+        <artifactId>jakarta.enterprise.cdi-api</artifactId>
+        <version>${jakarta.cdi.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>jakarta.ws.rs</groupId>
+        <artifactId>jakarta.ws.rs-api</artifactId>
+        <version>${jakarta.ws.rs.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.eclipse.microprofile.config</groupId>
+        <artifactId>microprofile-config-api</artifactId>
+        <version>${microprofile.config.version}</version>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
+
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <version>${maven-compiler-plugin.version}</version>
+        <configuration>
+          <release>${java.version}</release>
+          <annotationProcessorPaths>
+            <path>
+              <groupId>org.projectlombok</groupId>
+              <artifactId>lombok</artifactId>
+              <version>${lombok.version}</version>
+            </path>
+          </annotationProcessorPaths>
+        </configuration>
+      </plugin>
+
+      <!-- flatten: resolve ${revision} to a literal at install/deploy so JitPack
+           publishes POMs without the variable. -->
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>flatten-maven-plugin</artifactId>
+        <version>${flatten-maven-plugin.version}</version>
+        <configuration>
+          <updatePomFile>true</updatePomFile>
+          <flattenMode>resolveCiFriendliesOnly</flattenMode>
+        </configuration>
+        <executions>
+          <execution>
+            <id>flatten</id>
+            <phase>process-resources</phase>
+            <goals>
+              <goal>flatten</goal>
+            </goals>
+          </execution>
+          <execution>
+            <id>flatten.clean</id>
+            <phase>clean</phase>
+            <goals>
+              <goal>clean</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+
+      <!-- surefire:
+           - @{surefireArgLine} = late-bound so JaCoCo can inject its agent.
+           - net.bytebuddy.experimental=true = red de seguridad SOLO para JVMs aun
+             mas nuevas que el byte-buddy fijado arriba (1.17.x ya cubre Java 23,
+             nuestra JVM de dev, de forma nativa). Inerte cuando byte-buddy ya
+             conoce la JVM; util si algun dia saltas a Java 25+ sin bumpear. -->
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <version>${maven-surefire-plugin.version}</version>
+        <configuration>
+          <!--suppress UnresolvedMavenProperty -->
+          <argLine>@{surefireArgLine} -Dnet.bytebuddy.experimental=true</argLine>
+        </configuration>
+      </plugin>
+
+      <!-- jacoco: single execdata per module; quality gate per BUNDLE. Modules
+           without tests emit no data → check is skipped. Floor is 85% LINE /
+           60% BRANCH: a regression safety net, NOT the bar of "good enough"
+           (real quality comes from review). The looser floor leaves head-room
+           for the few SDK-client-construction lines in the cloud adapters that
+           can't be unit-tested without a live service (their logic IS tested
+           via injected mock clients). -->
+      <plugin>
+        <groupId>org.jacoco</groupId>
+        <artifactId>jacoco-maven-plugin</artifactId>
+        <version>${jacoco.version}</version>
+        <configuration>
+          <excludes>
+            <exclude>**/example/**</exclude>
+          </excludes>
+        </configuration>
+        <executions>
+          <execution>
+            <id>jacoco-prepare-agent</id>
+            <goals>
+              <goal>prepare-agent</goal>
+            </goals>
+            <configuration>
+              <propertyName>surefireArgLine</propertyName>
+            </configuration>
+          </execution>
+          <execution>
+            <id>jacoco-report</id>
+            <phase>verify</phase>
+            <goals>
+              <goal>report</goal>
+            </goals>
+          </execution>
+          <execution>
+            <id>jacoco-check</id>
+            <phase>verify</phase>
+            <goals>
+              <goal>check</goal>
+            </goals>
+            <configuration>
+              <haltOnFailure>true</haltOnFailure>
+              <rules>
+                <rule>
+                  <element>BUNDLE</element>
+                  <limits>
+                    <limit>
+                      <counter>LINE</counter>
+                      <value>COVEREDRATIO</value>
+                      <minimum>0.85</minimum>
+                    </limit>
+                    <limit>
+                      <counter>BRANCH</counter>
+                      <value>COVEREDRATIO</value>
+                      <minimum>0.60</minimum>
+                    </limit>
+                  </limits>
+                </rule>
+              </rules>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
+  </build>
+
+</project>

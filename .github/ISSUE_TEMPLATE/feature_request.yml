@@ -1,0 +1,38 @@
+name: Feature request
+description: Suggest an idea or a new target for remote-upload
+labels: [ "enhancement" ]
+body:
+  - type: textarea
+    id: usecase
+    attributes:
+      label: Use case
+      description: Describe the problem you're trying to solve, in one paragraph.
+    validations:
+      required: true
+
+  - type: textarea
+    id: workaround
+    attributes:
+      label: Current workaround
+      description: How are you handling this today (if at all)?
+
+  - type: textarea
+    id: api
+    attributes:
+      label: Proposed API sketch
+      description: A rough idea of how the API could look.
+      render: java
+
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      options:
+        - new target (S3-like, cloud, protocol, ...)
+        - core API
+        - Spring starter
+        - Quarkus module
+        - build / CI / docs
+        - other
+    validations:
+      required: true

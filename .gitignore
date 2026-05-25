@@ -1,0 +1,24 @@
+# Build
+target/
+**/target/
+
+# Maven flatten plugin — temporary POM with ${revision} resolved.
+.flattened-pom.xml
+**/.flattened-pom.xml
+
+# IDEs
+.idea/
+*.iml
+*.ipr
+*.iws
+.vscode/
+.classpath
+.project
+.settings/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs — build/sonar logs NEVER go to the repo (lesson from remote-download).
+*.log
